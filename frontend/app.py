@@ -17,7 +17,6 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime
 
-# ── Config ────────────────────────────────────────────────────────────────────
 API_BASE = "http://localhost:8000"
 st.set_page_config(
     page_title="RAG Analytics Platform",
@@ -26,7 +25,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Session State Init ────────────────────────────────────────────────────────
 for key, default in [
     ("session_id", None),
     ("chat_history", []),
@@ -37,8 +35,6 @@ for key, default in [
     if key not in st.session_state:
         st.session_state[key] = default
 
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
 # Upload needs a long timeout — first run downloads the embedding model (~90MB)
 UPLOAD_TIMEOUT = 600   # 10 min
 QUERY_TIMEOUT  = 180   # 3 min
@@ -50,16 +46,16 @@ def api_post(endpoint: str, timeout: int = QUERY_TIMEOUT, **kwargs) -> dict | No
         resp.raise_for_status()
         return resp.json()
     except requests.exceptions.ConnectionError:
-        st.error("❌ Cannot connect to backend. Make sure uvicorn is running: `uvicorn main:app --port 8000`")
+        st.error("Cannot connect to backend. Make sure uvicorn is running: `uvicorn main:app --port 8000`")
     except requests.exceptions.ReadTimeout:
-        st.error("⏱️ Request timed out. The backend is still processing — wait a moment and try again. "
+        st.error("⏱ Request timed out. The backend is still processing — wait a moment and try again. "
                  "On first run, the embedding model (~90MB) needs to download.")
     except requests.exceptions.HTTPError as e:
         try:
             detail = e.response.json().get("detail", str(e))
         except Exception:
             detail = str(e)
-        st.error(f"❌ API Error: {detail}")
+        st.error(f"API Error: {detail}")
     return None
 
 
@@ -69,11 +65,11 @@ def api_get(endpoint: str, timeout: int = 60) -> dict | None:
         resp.raise_for_status()
         return resp.json()
     except requests.exceptions.ConnectionError:
-        st.error("❌ Cannot connect to backend.")
+        st.error(" Cannot connect to backend.")
     except requests.exceptions.ReadTimeout:
-        st.error("⏱️ Request timed out.")
+        st.error("⏱ Request timed out.")
     except Exception as e:
-        st.error(f"❌ {e}")
+        st.error(f" {e}")
     return None
 
 
@@ -96,18 +92,18 @@ def confidence_badge(score: float) -> str:
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.title("📊 RAG Analytics")
+    st.title("RAG Based Data Analytics")
     st.markdown("---")
 
     # File Upload
-    st.subheader("1️⃣  Upload Dataset")
+    st.subheader("First Upload Dataset")
     uploaded_file = st.file_uploader(
         "CSV / Excel / JSON",
         type=["csv", "xlsx", "xls", "json"],
         help="Max recommended size: 50MB",
     )
 
-    if uploaded_file and st.button("🚀 Ingest Dataset", type="primary"):
+    if uploaded_file and st.button("Ingest Dataset", type="primary"):
         with st.spinner("Ingesting… first run downloads the embedding model, please wait up to 5 min"):
             result = api_post(
                 "/api/upload",
@@ -131,14 +127,14 @@ with st.sidebar:
     # Session Info
     if st.session_state.session_id:
         st.markdown("---")
-        st.subheader("📁 Active Session")
+        st.subheader("Active Session")
         info = st.session_state.dataset_info
         st.markdown(f"**File:** {info.get('name', 'N/A')}")
         st.markdown(f"**Rows:** {info.get('rows', 0):,}  |  **Cols:** {info.get('columns', 0)}")
         st.markdown(f"**Chunks:** {info.get('chunks', 0)}")
         st.markdown(f"**Session ID:** `{st.session_state.session_id}`")
 
-        if st.button("🗑️ Reset Session"):
+        if st.button(" Reset Session"):
             api_get(f"/api/session/{st.session_state.session_id}")
             requests.delete(f"{API_BASE}/api/session/{st.session_state.session_id}", timeout=10)
             for key in ("session_id", "chat_history", "data_summary", "quality_report", "dataset_info"):
@@ -147,8 +143,8 @@ with st.sidebar:
 
     # History Tab
     st.markdown("---")
-    st.subheader("📜 Query Log")
-    if st.button("🔄 Load History"):
+    st.subheader(" Query Log")
+    if st.button("Load History"):
         hist = api_get("/api/history?limit=20")
         if hist:
             df_hist = pd.DataFrame(hist.get("history", []))
@@ -158,13 +154,12 @@ with st.sidebar:
                 st.info("No queries logged yet.")
 
 
-# ── Main Area ─────────────────────────────────────────────────────────────────
+#Main
 st.title("RAG Data Analytics ")
 
 # Tabs
 tab_chat, tab_quality, tab_summary = st.tabs(["💬 Chat", "🔍 Data Quality", "📈 Data Summary"])
 
-# ── TAB 1: Chat Interface ─────────────────────────────────────────────────────
 with tab_chat:
     if not st.session_state.session_id:
         st.info("👈 Upload a dataset in the sidebar to get started.")
@@ -276,8 +271,6 @@ with tab_chat:
                 })
             st.rerun()
 
-
-# ── TAB 2: Data Quality Report ────────────────────────────────────────────────
 with tab_quality:
     if not st.session_state.quality_report:
         st.info("Upload a dataset to view the data quality report.")
@@ -305,8 +298,7 @@ with tab_quality:
             )
             st.dataframe(ct_df, use_container_width=True)
 
-
-# ── TAB 3: Data Summary ───────────────────────────────────────────────────────
+#text summary
 with tab_summary:
     if not st.session_state.data_summary:
         st.info("Upload a dataset to view the data summary.")
