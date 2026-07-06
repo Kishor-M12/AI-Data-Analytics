@@ -94,12 +94,13 @@ AI_Data/
 
 ### 1. Prerequisites
 - Python 3.11+
-- pip
+- pip or UV Package Manager 
 
 ### 2. Install Dependencies
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt  
 ```
+If it shows some Error Install it in line by line or one by one modules 
 
 ### 3. Configure Environment
 ```bash
