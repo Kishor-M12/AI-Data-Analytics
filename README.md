@@ -137,7 +137,7 @@ streamlit run frontend/app.py
 ## 🚀 Usage
 
 1. Open **http://localhost:8501**
-2. Upload `data/sample_ecommerce.csv` (or your own file)
+2. Upload `Your own Data File`
 3. Click **Ingest Dataset** — wait for embedding to complete
 4. Type a question in the chat, e.g.:
    - `"Top 5 products by revenue"`
@@ -208,3 +208,5 @@ Query: "January sales by region" → Both win    (date keyword + meaning)
 RRF formula: `score(d) = Σ 1 / (60 + rank_i)` across ranked lists
 
 This ensures neither pure keyword nor pure semantic search dominates — the best results from both always surface.
+=======
+# AI-Data-Analytics
